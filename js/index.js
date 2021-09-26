@@ -4,6 +4,8 @@ const playerCard = document.getElementById("p-card")
 const computerCard = document.getElementById("c-card")
 const winnerTitle = document.querySelector(".winner-title")
 const title = document.querySelector(".title")
+const cardsRemaining = document.getElementById("cards-left")
+
 
 let deckId = null
 let cardsArr = null
@@ -29,10 +31,9 @@ function getCards() {
     fetch(`https://www.deckofcardsapi.com/api/deck/${deckId}/draw/?count=2`)
         .then(res => res.json())
         .then(data => {
-            clearBoard()
             const remaining = data.remaining
             cardsArr = data.cards
-            renderCards(cardsArr, remaining)
+            renderCards(data, remaining)
             const scores = getValues(cardsArr[0], cardsArr[1])
             const winnerStr = getWinner(scores)
             updateScoreBoards(winnerStr)
@@ -46,21 +47,30 @@ function getCards() {
 function updateDisplay(data) {
     newDeckBtn.style.display = "none"
     drawBtn.style.display = "block"
-    title.textContent = "Cards remaining :"
-    const span = document.createElement("span")
-    span.id = "cards-left"
-    span.textContent = `${data.remaining}`
-    title.appendChild(span)
+    cardsRemaining.textContent = data.remaining
+   
+
+    
 
 }
 
-function renderCards(cardsArr, remaining) {
-    const span = document.getElementById("cards-left")
-    cardElements = creatImgElement(cardsArr)
-    playerCard.appendChild(cardElements[0])
-    computerCard.appendChild(cardElements[1])
-    span.textContent = remaining
-    
+function renderCards(data, remaining) {
+    const cardContainers = document.querySelectorAll(".card")
+
+    setImages(data)
+    cardContainers.forEach(card => {
+        card.style.display = "block"
+    })
+    cardsRemaining.textContent = remaining
+
+}
+
+function setImages(data) {
+    const cardsarr = data.cards
+    const cardImages = document.querySelectorAll(".card-img")
+    for(let i = 0; i < cardImages.length; i++) {
+        cardImages[i].src = `${cardsarr[i].image}`
+    }
 }
 
 function creatImgElement(cardsArr) {
@@ -73,14 +83,6 @@ function creatImgElement(cardsArr) {
     })
     return cardElements
     
-}
-
-function clearBoard() {
-    const oldCards = document.querySelectorAll(".card-img")
-    if(oldCards.length > 0) {
-        oldCards[0].remove()
-        oldCards[1].remove()
-    }
 }
 
 function getValues(card1, card2) {

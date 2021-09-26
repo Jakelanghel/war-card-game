@@ -15,25 +15,30 @@
     <div class="container flex-center">
         <div class="header">
             <h1 class="title">war</h1>
-            <h2 class="score-title">player score: <span id="p-score">0</span></h2>
         </div>
         
 
-        <div class="card" id="p-card">
-
+        <div class="card" id="c-card">
+            <img src="" alt="" class="card-img">
         </div><!-- Cards added with JS-->
 
         <div class="actions">
             <h2 class="winner-title"></h2>
+
             <button class="btn new-deck" id="new-deck-btn">New Deck</button>
             <button class="btn draw" id="draw-cards">Draw</button>
+            
         </div>
 
-        <div class="card" id="c-card">
-            
+        <div class="card" id="p-card">
+            <img src="" alt="" class="card-img">
         </div><!-- Cards added with JS-->
-            
-        <h2 class="score-title">conputer score: <span id="c-score">0</span></h2>
+        <div class="score-board">
+            <h2 class="sb remaining">cards-remaining: <span id="cards-left"></span></h2>
+            <h2 class="sb p-score">player score: <span id="p-score">0</span></h2>
+            <h2 class="sb c-score">computer score: <span id="c-score">0</span></h2>
+        </div>
+        
     </div>
     
 <script src="js/index.js"></script>
