@@ -12,35 +12,41 @@
 </head>
 <body>
 
-    <div class="container flex-center">
-        <div class="header">
-            <h1 class="title">war</h1>
+    <div class="container ">
+        <div class="main-content flex-center">
+            <div class="header">
+                <h1 class="title">war</h1>
+            </div>
+            
+    
+            <div class="card first-card c-indicator" id="c-card">
+                <img src="" alt="" class="card-img">
+            </div><!-- Cards added with JS-->
+    
+            <div class="actions">
+                <h2 class="winner-title"></h2>
+    
+                <button class="btn new-deck" id="new-deck-btn">New Deck</button>
+                <button class="btn draw" id="draw-cards">Draw</button>
+                
+            </div>
+    
+            <div class="card first-card p-indicator" id="p-card">
+                <img src="" alt="" class="card-img ">
+            </div><!-- Cards added with JS-->
+            
+            <div class="score-board">
+                <h2 class="sb remaining">cards-remaining: <span id="cards-left"></span></h2>
+                <h2 class="sb p-score">player card count: <span id="p-score">0</span></h2>
+                <h2 class="sb c-score">computer card count: <span id="c-score">0</span></h2>
+            </div>
         </div>
         
-
-        <div class="card" id="c-card">
-            <img src="" alt="" class="card-img">
-        </div><!-- Cards added with JS-->
-
-        <div class="actions">
-            <h2 class="winner-title"></h2>
-
-            <button class="btn new-deck" id="new-deck-btn">New Deck</button>
-            <button class="btn draw" id="draw-cards">Draw</button>
-            
-        </div>
-
-        <div class="card" id="p-card">
-            <img src="" alt="" class="card-img">
-        </div><!-- Cards added with JS-->
-        <div class="score-board">
-            <h2 class="sb remaining">cards-remaining: <span id="cards-left"></span></h2>
-            <h2 class="sb p-score">player score: <span id="p-score">0</span></h2>
-            <h2 class="sb c-score">computer score: <span id="c-score">0</span></h2>
-        </div>
         
     </div>
     
-<script src="js/index.js"></script>
+<script src="js/model/model.js"></script>
+<script src="js/view/view.js"></script>
+<script src="js/controller/controller.js"></script>
 </body>
 </html>
