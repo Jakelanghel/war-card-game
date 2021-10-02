@@ -1,6 +1,6 @@
 class View {
     constructor() {
-           this.deckBtn = document.getElementById("new-deck-btn")
+           this.deckBtn = document.getElementById("new-deck")
            this.drawBtn = document.getElementById("draw-cards")
            this.remainingSpan = document.getElementById("cards-left")
            this.remainingContainer = document.querySelector(".remaining")
@@ -9,93 +9,133 @@ class View {
            this.winnerTitle = document.querySelector(".winner-title")
            this.playerScore = document.getElementById("p-score")
            this.computerScore = document.getElementById("c-score")
-           this.firstWarCard = false
+           this.restartBtn = document.getElementById("restart")
            this.leftPos = 0
-           
+
+           this.war = false
+           this.firstWarCard = false
+           this.warMsg = "IT'S A WAR ! ! ! "
     }
+
+    // =======================
+    //  BINDING METHODS ======
+    // =======================
 
     bindStartGame(handler) {
-        this.deckBtn.addEventListener("click", () => {
-            this.deckBtn.style.display = "none"
-            this.drawBtn.style.display ="block"
-            this.remainingSpan.textContent = 52
-            this.remainingContainer.style.opacity = 1
-            handler()
-        })
-    }
-
-    bindDrawCards(handler1, handler2) {
-        this.drawBtn.addEventListener("click", async () => {
-            const data = await handler1()
-            if(data.gameover) {
-                if(data.war) {
-                    console.log("war but no cards left")
-                }else {
-                    console.log("game over")
-                }
+        this.deckBtn.addEventListener("click", async () => {
+            const data = await handler()
+            if(data) {
+                this._startGame(data)
             }else {
-                setTimeout(() => {
-                    if(data === undefined) {
-                        console.log("ERROR")
-                    }else if(data.war) {
-                        if(!this.firstWarCard) {
-                            this._handleFirstWarCard(data)
-                        }else {
-                           this._handleMultibleWarCards(data, handler2)
-                        }
-                    }else {
-                        console.log("Y")
-                        this._updateDisplay(data)
-                    }
-                }, 500);
+                this._renderErrorMsg()
             }
         })
     }
 
+    bindDrawCards(handler1) {
+        this.drawBtn.addEventListener("click", async () => {
+            const data = await handler1()
+            this._hideDawBtn()
+            this._showMsg(data)
+            this._updateCardCount(data)
+            // Check data.msg to see if a war has started
+            this._checkWarStarted(data)
+            if(!this.war) {
+                // If war is false render cards
+                this._renderCards(data)
+                this._updateScore(data)
+                this._checkGameOver(data)
+            }else {
+                this._handleWar(data)
+                this._updateScore(data)
+                this._reset()
+            }
+            
+        })
+    }
 
     // =======================
-    //  UTILITY METHODS ======
-    // ======================= 
+    //  GAME METHODS =========
+    // =======================
+
+    _startGame(data) {
+        this.deckBtn.style.display = "none"
+        this.drawBtn.style.display ="block"
+        this.remainingSpan.textContent = data.remaining
+        this.remainingContainer.style.opacity = 1
+    }
+
+    _checkGameOver(data) {
+        let gameOver = null
+        if(data.cardsRemaining > 0) {
+            gameOver = false
+        }else {
+            gameOver = true
+        }
+
+        if(gameOver) {
+            this._renderGameOver(data)
+        }else {
+            this._reset()
+        }
+    }
+
+    _renderGameOver(data) {
+        this.cardContainers.forEach(card => {
+            card.style.display = "none"
+        })
+
+        if(data.playerScore > data.computerScore) {
+            this.winnerTitle.textContent = "YOU WON!!"
+            this.winnerTitle.classList.add("game-over")
+            this.restartBtn.style.display = "block"
+        }else {
+            this.winnerTitle.textContent = "YOU LOST!!"
+            this.winnerTitle.classList.add("game-over")
+            this.restartBtn.style.display = "block"
+        }
+    }
 
     _renderCards(data) {
         this.cardImgs[0].src = data.computerImg
         this.cardImgs[1].src = data.playerImg
-        this.remainingSpan.textContent =  data.cardsRemaining
         this.cardContainers.forEach(container => {
             container.style.display = "block"
         })
     }
 
-    _updateDisplay(data) {
-        this._renderCards(data)
-        this._renderScore(data)
-        this._renderMsg(data)
-        setTimeout(() => {
-            this._reset()
-        }, 2000)
+
+    // =======================
+    //  WAR METHODS ==========
+    // =======================
+
+    _handleWar(data) {
+        if(!this.firstWarCard) {
+            this._renderCards(data)
+            this.firstWarCard = true
+        }else {
+            const warCards = this._createWarCards(data)
+            this._renderWarCards(warCards, data)
+            this._checkWarEnd(data)
+        }
     }
 
-    _renderScore(data) {
-        this.playerScore.textContent = data.playerScore
-        this.computerScore.textContent = data.computerScore
-        
+    _checkWarStarted(data) {
+        if(data.msg === this.warMsg) {
+            this.war = true
+        }
     }
 
-    _renderMsg(data) {
-        this.drawBtn.style.display = "none"
-        this.winnerTitle.textContent = data.msg
-        this.winnerTitle.style.display = "block"
+    _checkWarEnd(data) {
+        if(this.msg !== this.warMsg) {
+            this.war = false
+            this.firstWarCard = false
+            this.leftPos = 0
+            this._removeWarCards(data)
+        }
     }
-
-    _reset() {
-        this.winnerTitle.style.display = "none"
-        this.drawBtn.style.display = "block"
-        this.winnerTitle.textContent = ""
-    }
-
-    // ======================
-    // WAR METHODS ==========
-    // ======================
+    // =======================
+    //  WAR CARD METHODS =====
 
     _createWarCards(data) {
         const warCards = []
@@ -132,27 +172,6 @@ class View {
         
     }
 
-    _handleFirstWarCard(data) {
-        this._renderCards(data)
-        this._renderMsg(data)
-        this.firstWarCard = true
-        setTimeout(() => {
-            this._reset()
-        }, 2000)
-    }
-
-    _handleMultibleWarCards(data,handler2) {
-        const warArr = this._createWarCards(data)
-        this._renderWarCards(warArr, data)
-        this.firstWarCard = handler2(data)
-        if(!this.firstWarCard) {
-            this._endWar(data)
-            this._removeWarCards(data)
-        } else {
-            this._continueWar(data)
-        }
-    }
-
     _renderWarCards(warCards, data) {
         const lastCCard = this.cardContainers[0].lastElementChild
         lastCCard.classList.remove("c-indicator")
@@ -160,12 +179,9 @@ class View {
         lastPCard.classList.remove("p-indicator")
         this.cardContainers[1].appendChild(warCards[0])
         this.cardContainers[0].appendChild(warCards[1])
-        this.remainingSpan.textContent =  data.cardsRemaining
-
     }
 
     _removeWarCards(data) {
-        console.log("NOW")
         setTimeout(() => {
             
             const warrCards = document.querySelectorAll(".war-card")
@@ -181,16 +197,51 @@ class View {
     }
 
 
-    _endWar(data) {
-        this._renderScore(data)
-        this._renderMsg(data)
+    // =======================
+    //  UTILITY METHODS ======
+    // ======================= 
+
+    _renderErrorMsg() {
+        this.winnerTitle.innerText = "Something went wrong.. \n Please refresh browser"
+        this.drawBtn.style.display = "none"
+        this.deckBtn.style.display = "none"
+        this.winnerTitle.style.display = "block"
     }
 
-    _continueWar(data) {
-        this._renderMsg(data)
+
+    _reset(data) {
         setTimeout(() => {
-            this._reset()
-        }, 2000)
+            this._hideMsg()
+            this._showDrawBtn()
+        },50)
     }
-}
 
+    _updateScore(data) {
+        this.playerScore.textContent = data.playerScore
+        this.computerScore.textContent = data.computerScore
+        
+    }
+
+    _hideDawBtn() {
+        this.drawBtn.style.display = "none"
+    }
+
+    _showDrawBtn() {
+        this.drawBtn.style.display = "block"
+    }
+
+    _showMsg(data) {
+        this.winnerTitle.textContent = data.msg
+        this.winnerTitle.style.display = "block"
+    }
+
+    _hideMsg() {
+        this.winnerTitle.style.display = "none"
+    }
+
+    _updateCardCount(data) {
+        this.remainingSpan.textContent =  data.cardsRemaining
+    }
+
+    
+}
