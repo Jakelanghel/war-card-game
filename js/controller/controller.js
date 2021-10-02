@@ -3,11 +3,13 @@ class Controller {
         this.model = model
         this.view = view
         this.view.bindStartGame(this.onDeckBtnClick)
-        this.view.bindDrawCards(this.HandleDrawClick, this.handleWar)
+        this.view.bindDrawCards(this.HandleDrawClick)
+
     }
 
-    onDeckBtnClick = () => {
-        this.model.getNewDeck()
+    onDeckBtnClick = async () => {
+        const startGame = await this.model.getNewDeck()
+        return await startGame
         
     }
 
@@ -15,11 +17,6 @@ class Controller {
         const viewData = await this.model.drawCards()
         return viewData
     }
-
-    handleWar = () => {
-        this.model.endWar()
-    }
-
 }
 
 const app = new Controller(new Model(), new View())
