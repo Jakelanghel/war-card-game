@@ -21,6 +21,7 @@ class Model {
             return await data
         }
         catch(e) {
+            console.log(e)
             return false
         }
     }
