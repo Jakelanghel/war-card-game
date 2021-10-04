@@ -32,25 +32,39 @@ class View {
         })
     }
 
-    bindDrawCards(handler1) {
+    bindDrawCards(handler1, handler2) {
         this.drawBtn.addEventListener("click", async () => {
             const data = await handler1()
-            this._hideDawBtn()
-            this._showMsg(data)
-            this._updateCardCount(data)
-            // Check data.msg to see if a war has started
-            this._checkWarStarted(data)
-            if(!this.war) {
-                // If war is false render cards
-                this._renderCards(data)
-                this._updateScore(data)
-                this._checkGameOver(data)
+            if(data) {
+                this._hideDawBtn()
+                this._showMsg(data)
+                this._updateCardCount(data)
+                // Check data.msg to see if a war has started
+                this._checkWarStarted(data)
+                if(!this.war) {
+                    // If war is false render cards
+                    this._renderCards(data)
+                    this._updateScore(data)
+                    this._checkGameOver(data, handler2)
+                }else {
+                    this._handleWar(data)
+                    this._updateScore(data)
+                    this._checkGameOver(data, handler2)
+                }
             }else {
-                this._handleWar(data)
-                this._updateScore(data)
-                this._reset()
+                this._renderErrorMsg()
             }
-            
+        })
+    }
+
+    bindRestartGame(handler) {
+        this.restartBtn.addEventListener("click", async () => {
+            const remaining = await handler()
+            if(remaining) {
+                this._resetGame(remaining)
+            }else {
+                this._renderErrorMsg()
+            }
         })
     }
 
@@ -65,35 +79,55 @@ class View {
         this.remainingContainer.style.opacity = 1
     }
 
-    _checkGameOver(data) {
-        let gameOver = null
-        if(data.cardsRemaining > 0) {
-            gameOver = false
-        }else {
-            gameOver = true
-        }
+    _resetGame(remaining) {
+        this.remainingSpan.textContent = remaining
+        this.winnerTitle.classList.remove("game-over")
+        this.winnerTitle.style.display = "none"
+        this.restartBtn.style.display = "none"
+        this.drawBtn.style.display = "block"
+        this.playerScore.textContent = 0
+        this.computerScore.textContent = 0
+    }
 
-        if(gameOver) {
-            this._renderGameOver(data)
-        }else {
-            this._reset()
-        }
+    async _checkGameOver(data, handler2) {
+        let gameOver = null
+        const war = true
+        
+        
+        if(data.cardsRemaining === 0) {
+            if(!data.war) {
+                this._renderGameOver(data)
+            }else {
+                const remaining = await handler2()
+                this.remainingSpan.textContent = remaining
+                this._reset()
+            }
+        }else this._reset()
+       
     }
 
     _renderGameOver(data) {
-        this.cardContainers.forEach(card => {
-            card.style.display = "none"
-        })
-
-        if(data.playerScore > data.computerScore) {
-            this.winnerTitle.textContent = "YOU WON!!"
-            this.winnerTitle.classList.add("game-over")
-            this.restartBtn.style.display = "block"
-        }else {
-            this.winnerTitle.textContent = "YOU LOST!!"
-            this.winnerTitle.classList.add("game-over")
-            this.restartBtn.style.display = "block"
-        }
+        setTimeout(() => {
+            this.cardContainers.forEach(card => {
+                card.style.display = "none"
+            })
+    
+            if(data.playerScore > data.computerScore) {
+                this.winnerTitle.textContent = "YOU WON!!"
+                this.winnerTitle.classList.add("game-over")
+                this.restartBtn.style.display = "block"
+            }else if(data.playerScore < data.computerScore) {
+                this.winnerTitle.textContent = "YOU LOST!!"
+                this.winnerTitle.classList.add("game-over")
+                this.restartBtn.style.display = "block"
+            }else {
+                
+                this.winnerTitle.textContent = "It's a tie. . "
+                this.winnerTitle.classList.add("game-over")
+                this.restartBtn.style.display = "block"
+            }
+        }, 2000);
+        
     }
 
     _renderCards(data) {
@@ -127,11 +161,11 @@ class View {
     }
 
     _checkWarEnd(data) {
-        if(this.msg !== this.warMsg) {
+        if(data.msg !== this.warMsg) {
             this.war = false
             this.firstWarCard = false
-            this.leftPos = 0
             this._removeWarCards(data)
+            this.leftPos = 0
         }
     }
     // =======================
@@ -202,6 +236,7 @@ class View {
     // ======================= 
 
     _renderErrorMsg() {
+        this.winnerTitle.classList.add("game-over")
         this.winnerTitle.innerText = "Something went wrong.. \n Please refresh browser"
         this.drawBtn.style.display = "none"
         this.deckBtn.style.display = "none"
@@ -213,7 +248,7 @@ class View {
         setTimeout(() => {
             this._hideMsg()
             this._showDrawBtn()
-        },50)
+        },2000)
     }
 
     _updateScore(data) {

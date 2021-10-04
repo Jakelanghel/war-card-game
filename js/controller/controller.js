@@ -3,7 +3,8 @@ class Controller {
         this.model = model
         this.view = view
         this.view.bindStartGame(this.onDeckBtnClick)
-        this.view.bindDrawCards(this.HandleDrawClick)
+        this.view.bindDrawCards(this.HandleDrawClick, this.continueWar)
+        this.view.bindRestartGame(this.restartGame)
 
     }
 
@@ -17,7 +18,16 @@ class Controller {
         const viewData = await this.model.drawCards()
         return viewData
     }
+    restartGame = async () => {
+        const remaining = this.model.restartGame()
+        return remaining
+    }
+
+    continueWar = async () => {
+        const remaining = this.model.shuffelDeck()
+        return remaining
+    }
 }
 
-const app = new Controller(new Model(), new View())
 
+const app = new Controller(new Model(), new View())

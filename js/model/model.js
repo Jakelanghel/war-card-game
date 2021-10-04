@@ -1,7 +1,7 @@
 class Model {
 
     constructor() {
-        this.deckData = null
+        this.deckId = null
         this.faceCards = { "JACK": 11, "QUEEN": 12, "KING": 13, "ACE": 15 }
         this.cardCounter = 0
         this.playerScore = 0
@@ -17,18 +17,17 @@ class Model {
         try {
             const response = await fetch("https://www.deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1")
             const data = await response.json()
-            this.deckData = data
+            this.deckId = data.deck_id
             return await data
         }
         catch(e) {
-            console.log(e)
             return false
         }
     }
 
     async drawCards() {
         try {
-            const response = await fetch(`https://www.deckofcardsapi.com/api/deck/${this.deckData.deck_id}/draw/?count=2`)
+            const response = await fetch(`https://www.deckofcardsapi.com/api/deck/${this.deckId}/draw/?count=2`)
             const data = await response.json()
             this._getCardValues(data)
             const viewData = this._setViewData(data)
@@ -36,9 +35,34 @@ class Model {
 
         }
         catch(e) {
-            console.log("ERROR123")
             return false
         }
+    }
+
+    async shuffelDeck() {
+        try {
+            const response = await fetch(`https://www.deckofcardsapi.com/api/deck/${this.deckId}/shuffle/`)
+            const data = await response.json()
+            return data.remaining
+        }
+        catch {
+           return false
+        }
+    }
+
+    async restartGame() {
+        this._resetData()
+        const remaining = await this.shuffelDeck()
+        return await remaining
+    }
+
+    _resetData() {
+        this.cardCounter = 0
+        this.playerScore = 0
+        this.computerScore = 0
+        this.cardsRemaining = 0
+        this.gameMsg = null
+        this.war = false
     }
 
     _setViewData(data) {
@@ -90,19 +114,19 @@ class Model {
 
     _checkWarCards(cardValues) {
         if(cardValues[0] > cardValues[1]) {
+            this.gameMsg = "You lost this round.."
             this.cardCounter += 2
             this.computerScore += this.cardCounter
             this.cardCounter = 0
             this.war = false
-            this.msg = "You lost this round.."
         }else if(cardValues[0] < cardValues[1]) {
+            this.gameMsg = "You WON this round!!"
             this.cardCounter += 2
             this.playerScore += this.cardCounter
             this.cardCounter = 0
             this.war = false
-            this.msg = "You WON this round!!"
         }else {
-            this.msg = "IT'S A WAR ! ! ! "
+            this.gameMsg = "IT'S A WAR ! ! ! "
             this.war = true
             this.cardCounter += 2
         }
