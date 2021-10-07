@@ -93,6 +93,7 @@ body {
 .card {
     display: none;
     max-width: 155px;
+    min-width: 155px;
     border-radius: 10px;
     padding: 5px;
 }

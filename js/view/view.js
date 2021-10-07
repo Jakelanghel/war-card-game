@@ -131,6 +131,8 @@ class View {
     }
 
     _renderCards(data) {
+        this.cardContainers[0].classList.add("c-indicator")
+        this.cardContainers[1].classList.add("p-indicator")
         this.cardImgs[0].src = data.computerImg
         this.cardImgs[1].src = data.playerImg
         this.cardContainers.forEach(container => {
@@ -227,7 +229,7 @@ class View {
             this.cardContainers[0].classList.add("c-indicator")
             this.cardContainers[1].classList.add("p-indicator")
             this._reset()
-        }, 4000)
+        }, 2000)
     }
 
 
